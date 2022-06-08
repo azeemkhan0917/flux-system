@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "emrchiver-ms.fullname" . }}
+  labels:
+    {{- include "emrchiver-ms.labels" . | nindent 4 }}
+  annotations:
+    {{ toYaml .Values.deploymentAnnotations | indent 4}}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  {{- if .Values.updateStrategy }}
+  strategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podAnnotationConfigChecksum }}
+        checksum/config: {{ tpl (toYaml .Values) . | sha256sum }}
+      {{- end }}
+      labels:
+        {{- include "emrchiver-ms.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "emrchiver-ms.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+            capabilities:            
+              {{ toYaml .Values.image.capabilities | indent 14}}
+            {{- end }}
+            runAsUser: {{ .Values.image.runAsUser }}
+            allowPrivilegeEscalation: {{ .Values.image.allowPrivilegeEscalation }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+            name: {{ .Release.Name }}-configmap
+          volumeMounts:
+          {{- if .Values.extraVolumeMounts }}
+            {{ toYaml .Values.extraVolumeMounts | indent 10}}
+          {{- end }}
+          ports:
+            {{- range .Values.portMappings }}
+            - name: {{ .portName }}
+              containerPort: {{ .port }}
+              protocol: {{ .protocol }}
+            {{- end }}  
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.liveness.path }}
+              port: {{ .Values.liveness.port }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readiness.path }}
+              port: {{ .Values.readiness.port }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    volumes:
+      {{- if .Values.extraVolumes }}
+        {{ toYaml .Values.extraVolumes | indent 8}}
+      {{- end }}
+      
