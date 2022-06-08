@@ -12,7 +12,7 @@ spec:
   {{- end }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   {{- if .Values.updateStrategy }}
-  strategy: {{- toYaml .Values.updateStrategy | nindent 4 }}
+  strategy: {{- toYaml .Values.updateStrategy | indent 4 }}
   {{- end }}
   template:
     metadata:
@@ -38,9 +38,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
             capabilities:            
-              {{- toYaml .Values.image.capabilities | nindent 14 }}
-            runAsUser: {{ .Values.image.runAsUser }}
-            allowPrivilegeEscalation: {{ .Values.image.allowPrivilegeEscalation }}
+              {{- toYaml .Values.capabilities | nindent 14 }} 
+            runAsUser: {{ .Values.runAsUser }}
+            allowPrivilegeEscalation: {{ .Values.allowPrivilegeEscalation }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
