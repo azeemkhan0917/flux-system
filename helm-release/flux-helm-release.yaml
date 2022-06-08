@@ -2,10 +2,10 @@ apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
   name: fluxcd-demo
-  namespace: default
+  namespace: flux-system
 spec:
   releaseName: emrchiver-ms
-  targetNamespace: fluxcd-demo
+  targetNamespace: flux-system
   chart:
     git: git@github.com:azeemkhan0917/flux-system.git
     path: helm-charts/emrchiver-ms
