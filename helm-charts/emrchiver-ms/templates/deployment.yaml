@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "emrchiver-ms.labels" . | nindent 4 }}
   annotations:
-    {{ toYaml .Values.deploymentAnnotations | indent 4}}
+    {{ toYaml .Values.deploymentAnnotations | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -38,8 +38,7 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
             capabilities:            
-              {{ toYaml .Values.image.capabilities | indent 14}}
-            {{- end }}
+              {{- toYaml .Values.image.capabilities | nindent 14 }}
             runAsUser: {{ .Values.image.runAsUser }}
             allowPrivilegeEscalation: {{ .Values.image.allowPrivilegeEscalation }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

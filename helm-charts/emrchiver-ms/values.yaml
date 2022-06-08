@@ -1,4 +1,11 @@
 # Default values for emrchiver-ms.
+configmap:
+   json_data: |-
+    {
+      "fruit":"Apple",
+      "size":"Large",
+      "color":"Red"
+    }
 
 replicaCount: 1
 
@@ -25,6 +32,10 @@ podAnnotations: {}
 podSecurityContext: {}
 
 securityContext: {}
+capabilities:
+  add: ["NET_ADMIN", "SYS_TIME"]
+runAsUser: 1000
+allowPrivilegeEscalation: false
 
 service:
   type: ClusterIP
@@ -56,3 +67,12 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+networkPolicy:
+  create: true
+
+liveness:
+  path: "/"
+
+readiness:
+  path: "/"

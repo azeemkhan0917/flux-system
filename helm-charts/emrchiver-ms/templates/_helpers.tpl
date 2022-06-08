@@ -42,6 +42,27 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{/*
+Selector labels
+*/}}
+{{- define "emrchiver-ms.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "emrchiver-ms.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Renders a value that contains template.
+Usage:
+{{ include "emrchiver-ms.tplvalues.render" ( dict "value" .Values.path.to.the.Value "context" $) }}
+*/}}
+
+{{- define "emrchiver-ms.tplvalues.render" -}}
+    {{- if typeIs "string" .value }}
+        {{- tpl .value .context }}
+    {{- else }}
+        {{- tpl (.value | toYaml) .context }}
+    {{- end }}
+{{- end -}}
 
 {{/*
 Create the name of the service account to use

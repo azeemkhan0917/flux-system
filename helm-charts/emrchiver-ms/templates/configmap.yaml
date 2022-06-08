@@ -3,9 +3,4 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-configmap
 data:
-  config.json: |-
-    {
-{{- range $key, $val := .Values.configmap.json_data }}
-{{ $key | quote | indent 6}}: {{ $val | quote }}
-{{- end}}
-    }
+  config.json: {{- include "emrchiver-ms.tplvalues.render" ( dict "value" .Values.configmap.json_data "context" $ ) | nindent 4 }}
