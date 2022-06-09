@@ -4,15 +4,20 @@ metadata:
   name: {{ include "emrchiver-ms.fullname" . }}
   labels:
     {{- include "emrchiver-ms.labels" . | nindent 4 }}
+  {{- with .Values.deploymentAnnotations }}
   annotations:
-    {{ toYaml .Values.deploymentAnnotations | nindent 4 }}
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "emrchiver-ms.selectorLabels" . | nindent 6 }}
   {{- if .Values.updateStrategy }}
-  strategy: {{- toYaml .Values.updateStrategy | indent 4 }}
+  strategy: 
+    type: {{ .Values.updateStrategy }}
   {{- end }}
   template:
     metadata:
@@ -37,15 +42,11 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-            capabilities:            
-              {{- toYaml .Values.capabilities | nindent 14 }} 
-            runAsUser: {{ .Values.runAsUser }}
-            allowPrivilegeEscalation: {{ .Values.allowPrivilegeEscalation }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
           - configMapRef:
-            name: {{ .Release.Name }}-configmap
+              name: {{ .Release.Name }}-configmap
           volumeMounts:
           {{- if .Values.extraVolumeMounts }}
             {{ toYaml .Values.extraVolumeMounts | indent 10}}

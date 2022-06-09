@@ -14,9 +14,9 @@ deploymentAnnotations: {}
 updateStrategy: "RollingUpdate"
 
 image:
-  repository: 
+  repository: "nginx"
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -31,11 +31,13 @@ podAnnotations: {}
 
 podSecurityContext: {}
 
+# securityContext:
+#   capabilities:
+#     add: ["NET_ADMIN", "SYS_TIME"]
+#   runAsUser: 1001
+#   allowPrivilegeEscalation: false
+
 securityContext: {}
-capabilities:
-  add: ["NET_ADMIN", "SYS_TIME"]
-runAsUser: 1000
-allowPrivilegeEscalation: false
 
 service:
   type: ClusterIP
@@ -69,10 +71,12 @@ tolerations: []
 affinity: {}
 
 networkPolicy:
-  create: true
+  create: false
 
 liveness:
   path: "/"
+  port: 80
 
 readiness:
   path: "/"
+  port: 80
