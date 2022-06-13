@@ -1,0 +1,6 @@
+dependencies:
+- name: emrchiver-common
+  repository: file://../emrchiver-common-library-chart/
+  version: 1.16.0
+digest: sha256:33c1ae4348949a0c749508dbc8ee89486c64dead59a9ab225c284191142ed6a3
+generated: "2022-06-13T11:26:34.883525-04:00"

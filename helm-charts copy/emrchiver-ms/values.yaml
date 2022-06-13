@@ -24,7 +24,8 @@ fullnameOverride: ""
 
 serviceAccount:
   create: true
-  annotations: {}
+  annotations:
+    app: emrchiver-ms
   name: ""
 
 podAnnotations: {}
@@ -37,7 +38,8 @@ podSecurityContext: {}
 #   runAsUser: 1001
 #   allowPrivilegeEscalation: false
 
-securityContext: {}
+containerSecurityContext:
+  enabled: false
 
 service:
   type: ClusterIP

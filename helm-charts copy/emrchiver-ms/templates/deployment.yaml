@@ -1,20 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "emrchiver-ms.fullname" . }}
+  name: {{ include "emrchiver-common.names.fullname" . }}
   labels:
-    {{- include "emrchiver-ms.labels" . | nindent 4 }}
-  {{- with .Values.deploymentAnnotations }}
-  annotations:
-    {{- toYaml . | nindent 8 }}
-  {{- end }}
+    {{- include "emrchiver-common.labels.standard" . | nindent 4 }}
+  annotations: {{- include "emrchiver-common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "emrchiver-ms.selectorLabels" . | nindent 6 }}
+      {{- include "emrchiver-common.labels.matchLabels" . | nindent 6 }}
   {{- if .Values.updateStrategy }}
   strategy: 
     type: {{ .Values.updateStrategy }}
@@ -29,19 +26,21 @@ spec:
         checksum/config: {{ tpl (toYaml .Values) . | sha256sum }}
       {{- end }}
       labels:
-        {{- include "emrchiver-ms.selectorLabels" . | nindent 8 }}
+        {{- include "emrchiver-common.labels.matchLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "emrchiver-ms.serviceAccountName" . }}
+      serviceAccountName: {{ include "emrchiver-common.names.fullname" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
+          {{- if .Values.containerSecurityContext.enabled }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
@@ -65,19 +64,17 @@ spec:
             httpGet:
               path: {{ .Values.readiness.path }}
               port: {{ .Values.readiness.port }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
+          {{- if .Values.resources }}
+          resources: {{- include "emrchiver-common.tplvalues.render" (dict "value" .Values.resources "context" $) | nindent 12 }}
+          {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- include "emrchiver-common.tplvalues.render" (dict "value" .Values.nodeSelector "context" $) | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
+      {{- if .Values.affinity }}
+      affinity:  {{- include "emrchiver-common.tplvalues.render" (dict "value" .Values.affinity "context" $) | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
+      {{- if .Values.tolerations }}
+      tolerations:  {{- include "emrchiver-common.tplvalues.render" (dict "value" .Values.tolerations "context" $) | nindent 8 }}
       {{- end }}
     volumes:
       {{- if .Values.extraVolumes }}

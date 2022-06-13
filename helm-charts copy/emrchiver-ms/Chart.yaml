@@ -1,0 +1,10 @@
+apiVersion: v2
+name: emrchiver-typescript-ms
+description: A Helm chart for typescript based microservice.
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+dependencies:
+  - name: emrchiver-common
+    repository: "file://../emrchiver-common-library-chart/"
+    version: 1.16.0

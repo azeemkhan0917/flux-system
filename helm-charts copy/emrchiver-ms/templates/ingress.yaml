@@ -1,16 +1,21 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "emrchiver-ms.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
-apiVersion: networking.k8s.io/v1
+apiVersion: {{ include "emrchiver-emrchiver-common.capabilities.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
-  labels:
-    {{- include "emrchiver-ms.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  name: {{ include "emrchiver-common.fullname" . }}
+  labels: {{- include "emrchiver-common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "emrchiver-common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- if .Values.ingress.annotations }}
+    {{- include "emrchiver-common.tplvalues.render" (dict "value" .Values.ingress.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "emrchiver-common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   {{- if .Values.ingress.tls }}

@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-configmap
-data:
-  config.json: -|
-    {{- include "emrchiver-ms.tplvalues.render" ( dict "value" .Values.configmap.json_data "context" $ ) | nindent 4 }}
